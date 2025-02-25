@@ -45,7 +45,7 @@ docker-compose up -d
 
 #### Mosquitto (MQTT Broker)
 
-- Порт: `${MOSQUITTO_PORT:-1883}`
+- Порт: `${MOSQUITTO_PORT:-1883}`, `${MOSQUITTO_WS_PORT:-1884}`
 - Описание: MQTT-брокер для обмена сообщениями между устройствами и сервисами.
 
 #### Postgres (TimescaleDB)
@@ -97,6 +97,7 @@ cp example.env .env
 ```env
 # Mosquitto
 MOSQUITTO_PORT=1883
+MOSQUITTO_WS_PORT=1884
 
 # PostgreSQL
 POSTGRES_PORT=5433
