@@ -21,9 +21,8 @@
 1. Склонируйте репозиторий:
 
 ```bash
-Copy
-git clone <ваш-репозиторий>
-cd <ваш-репозиторий>
+git clone https://github.com/ValentinAlekhin/mqtt-stack
+cd mqtt-stack
 ```
 
 2. Создайте файл `.env` на основе примера `example.env`:
