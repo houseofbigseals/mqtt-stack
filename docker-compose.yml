@@ -1,0 +1,92 @@
+services:
+ mosquitto:
+  image: eclipse-mosquitto:2.0.20
+  container_name: mosquitto
+  ports:
+   - '${MOSQUITTO_PORT:-1883}:1883'
+  volumes:
+   - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+  restart: unless-stopped
+
+ postgres:
+  image: timescale/timescaledb:2.18.1-pg17
+  container_name: postgres
+  environment:
+   - POSTGRES_USER=${POSTGRES_USER}
+   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+   - POSTGRES_DB=${POSTGRES_DB}
+  volumes:
+   - ./data/postgres:/var/lib/postgresql/data
+  ports:
+   - '${POSTGRES_PORT:-5432}:5432'
+  restart: unless-stopped
+
+ telegraf:
+  image: telegraf:1.33.2-alpine
+  container_name: telegraf
+  depends_on:
+   - mosquitto
+   - postgres
+  volumes:
+   - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+  environment:
+   - POSTGRES_USER=${POSTGRES_USER}
+   - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+   - POSTGRES_DB=${POSTGRES_DB}
+  restart: unless-stopped
+
+ grafana:
+  image: grafana/grafana:11.5.2-ubuntu
+  container_name: grafana
+  ports:
+   - '${GRAFANA_PORT:-3001}:3000'
+  environment:
+   - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+   - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+  volumes:
+   - ./data/grafana:/var/lib/grafana
+  depends_on:
+   - postgres
+  restart: unless-stopped
+
+ nodered:
+  image: nodered/node-red:4.0.9-22-minimal
+  container_name: nodered
+  ports:
+   - '${NODERED_PORT:-1880}:1880'
+  volumes:
+   - ./data/nodered:/data
+  depends_on:
+   - mosquitto
+   - postgres
+  restart: unless-stopped
+
+ wb-vue-dashboard:
+  image: valentinalekhin/wb-vue-dashboard:latest
+  container_name: wb-vue-dashboard
+  ports:
+   - '${WB_VUE_DASHBOARD_PORT:-3000}:3000'
+  environment:
+   - NUXT_PUBLIC_MQTT_BROKER=${NUXT_PUBLIC_MQTT_BROKER}
+  depends_on:
+   - mosquitto
+  restart: unless-stopped
+
+ dozzle:
+  image: amir20/dozzle:latest
+  container_name: dozzle
+  ports:
+   - '${DOZZLE_PORT:-8080}:8080'
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+  restart: unless-stopped
+
+ portainer:
+  image: portainer/portainer-ce:latest
+  container_name: portainer
+  ports:
+   - '${PORTAINER_PORT:-9000}:9000'
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - ./data/portainer:/data
+  restart: unless-stopped
