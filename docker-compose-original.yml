@@ -50,6 +50,17 @@ services:
    - postgres
   restart: unless-stopped
 
+ nodered:
+  image: nodered/node-red:4.0.9-22-minimal
+  container_name: nodered
+  ports:
+   - '${NODERED_PORT:-1880}:1880'
+  volumes:
+   - ./data/nodered:/data
+  depends_on:
+   - mosquitto
+   - postgres
+  restart: unless-stopped
 
  wb-vue-dashboard:
   image: valentinalekhin/wb-vue-dashboard:latest
@@ -71,3 +82,12 @@ services:
    - /var/run/docker.sock:/var/run/docker.sock
   restart: unless-stopped
 
+ portainer:
+  image: portainer/portainer-ce:latest
+  container_name: portainer
+  ports:
+   - '${PORTAINER_PORT:-9000}:9000'
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - ./data/portainer:/data
+  restart: unless-stopped
